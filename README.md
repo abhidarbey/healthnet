@@ -1,6 +1,17 @@
-## Healthnet
+# Healthnet
 
 A sample Node.js app to demonstrate **__fabric-client__** & **__fabric-ca-client__** Node.js SDK APIs
+
+This network is based on 2 Orgs, 4 Peers, single channel and single chaincode.
+
+In the network, there are hospitals, doctors and patients as members and reports as assets.
+
+When a patient creates a report, their balance is reduced by the fee amount mentioned in teh report and the hospital's balance is credited by the similar amount.
+
+The app allows to create and query every members and assets as well as transfer of patient to another hospital.
+
+## TODO
+ReactJS frontend client application.
 
 ### Prerequisites and setup:
 
