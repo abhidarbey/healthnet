@@ -1,4 +1,4 @@
-## Balance transfer
+## Healthnet
 
 A sample Node.js app to demonstrate **__fabric-client__** & **__fabric-ca-client__** Node.js SDK APIs
 
@@ -11,7 +11,7 @@ A sample Node.js app to demonstrate **__fabric-client__** & **__fabric-ca-client
 * [Download Docker images](http://hyperledger-fabric.readthedocs.io/en/latest/samples.html#binaries)
 
 ```
-cd fabric-samples/balance-transfer/
+cd fabric-samples/healthnet/
 ```
 
 Once you have completed the above setup, you will have provisioned a local network with the following docker container configuration:
@@ -26,43 +26,10 @@ Once you have completed the above setup, you will have provisioned a local netwo
 
 ## Running the sample program
 
-There are two options available for running the balance-transfer sample
-For each of these options, you may choose to run with chaincode written in golang or in node.js.
-
-### Option 1:
-
-##### Terminal Window 1
-
-* Launch the network using docker-compose
-
-```
-docker-compose -f artifacts/docker-compose.yaml up
-```
-##### Terminal Window 2
-
-* Install the fabric-client and fabric-ca-client node modules
-
-```
-npm install
-```
-
-* Start the node app on PORT 4000
-
-```
-PORT=4000 node app
-```
-
-##### Terminal Window 3
-
-* Execute the REST APIs from the section [Sample REST APIs Requests](https://github.com/hyperledger/fabric-samples/tree/master/balance-transfer#sample-rest-apis-requests)
-
-
-### Option 2:
-
 ##### Terminal Window 1
 
 ```
-cd fabric-samples/balance-transfer
+cd fabric-samples/healthnet
 
 ./runApp.sh
 
@@ -74,26 +41,7 @@ cd fabric-samples/balance-transfer
 
 ##### Terminal Window 2
 
-
-In order for the following shell script to properly parse the JSON, you must install ``jq``:
-
-instructions [https://stedolan.github.io/jq/](https://stedolan.github.io/jq/)
-
-With the application started in terminal 1, next, test the APIs by executing the script - **testAPIs.sh**:
-```
-cd fabric-samples/balance-transfer
-
-## To use golang chaincode execute the following command
-
-./testAPIs.sh -l golang
-
-## OR use node.js chaincode
-
-./testAPIs.sh -l node
-```
-
-
-## Sample REST APIs Requests
+Execute Sample REST APIs Requests
 
 ### Login Request
 
@@ -155,21 +103,6 @@ curl -s -X POST \
 	"chaincodeVersion":"1.0"
 }'
 ```
-**NOTE:** *chaincodeType* must be set to **node** when node.js chaincode is used and *chaincodePath* must be set to the location of the node.js chaincode. Also put in the $PWD
-```
-ex:
-curl -s -X POST \
-  http://localhost:4000/chaincodes \
-  -H "authorization: Bearer <put JSON Web Token here>" \
-  -H "content-type: application/json" \
-  -d '{
-	"peers": ["peer0.org1.example.com","peer1.org1.example.com"],
-	"chaincodeName":"mycc",
-	"chaincodePath":"$PWD/artifacts/src/github.com/example_cc/node",
-	"chaincodeType": "node",
-	"chaincodeVersion":"v0"
-}'
-```
 
 ### Instantiate chaincode
 
@@ -186,7 +119,6 @@ curl -s -X POST \
 	"args":[""]
 }'
 ```
-**NOTE:** *chaincodeType* must be set to **node** when node.js chaincode is used
 
 ### Invoke request
 
@@ -201,16 +133,34 @@ curl -s -X POST \
 	"args":[""]
 }'
 ```
+##### Other invoke functions are:
+* "fcn":"createHospital", "args":["H008","HOSPITAL_8","INDIA","10000000"]
+Function createHospital needs 4 args: HospitalID, Name, Country, Balance
+
+* "fcn":"createDoctor", "args":["D008","DOCTOR_8","H008","100000"]
+Function createDoctor needs 4 args: DoctorID, Name, HospitalID, Balance
+
+* "fcn":"createPatient", "args":["P008","PATIENT_8","R008","H008","100000"]
+Function createPatient needs 4 args: PatientID, Name, ReportID, HospitalID, Balance
+
+* "fcn":"createReport", "args":["R008","P008","H008","1500"]
+Function createReport needs 4 args: ReportID, PatientID, HospitalID, Balance
+
 **NOTE:** Ensure that you save the Transaction ID from the response in order to pass this string in the subsequent query transactions.
 
 ### Chaincode Query
 
 ```
 curl -s -X GET \
-  "http://localhost:4000/channels/mychannel/chaincodes/mycc?peer=peer0.org1.example.com&fcn=query&args=%5B%22a%22%5D" \
+  "http://localhost:4000/channels/mychannel/chaincodes/health?peer=peer0.org1.example.com&fcn=queryAllHospitals&args=%5B%22a%22%5D" \
   -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json"
 ```
+##### Other invoke functions are (replace fcn in the link):
+* queryAllDoctors
+* queryAllPatients
+* queryAllReports
+
 
 ### Query Block by BlockNumber
 
@@ -301,4 +251,3 @@ To retrieve the IP Address for one of your network entities, issue the following
 docker inspect peer0 | grep IPAddress
 ```
 
-<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
