@@ -161,7 +161,9 @@ app.post('/channels', async function(req, res) {
 app.post('/channels/:channelName/peers', async function(req, res) {
 	logger.info('<<<<<<<<<<<<<<<<< J O I N  C H A N N E L >>>>>>>>>>>>>>>>>');
 	var channelName = req.params.channelName;
-	var peers = req.body.peers;
+	var peer1 = req.body.peer1;
+	var peer2 = req.body.peer2;
+	var peers = [peer1, peer2];
 	logger.debug('channelName : ' + channelName);
 	logger.debug('peers : ' + peers);
 	logger.debug('username :' + req.username);
@@ -171,18 +173,25 @@ app.post('/channels/:channelName/peers', async function(req, res) {
 		res.json(getErrorMessage('\'channelName\''));
 		return;
 	}
-	if (!peers || peers.length == 0) {
-		res.json(getErrorMessage('\'peers\''));
+	if (!peer1) {
+		res.json(getErrorMessage('\'peer1\''));
+		return;
+	}
+	if (!peer2) {
+		res.json(getErrorMessage('\'peer2\''));
 		return;
 	}
 
 	let message =  await join.joinChannel(channelName, peers, req.username, req.orgname);
 	res.send(message);
 });
+
 // Install chaincode on target peers
 app.post('/chaincodes', async function(req, res) {
 	logger.debug('==================== INSTALL CHAINCODE ==================');
-	var peers = req.body.peers;
+	var peer1 = req.body.peer1;
+	var peer2 = req.body.peer2;
+	var peers = [peer1, peer2];
 	var chaincodeName = req.body.chaincodeName;
 	var chaincodePath = req.body.chaincodePath;
 	var chaincodeVersion = req.body.chaincodeVersion;
@@ -192,8 +201,13 @@ app.post('/chaincodes', async function(req, res) {
 	logger.debug('chaincodePath  : ' + chaincodePath);
 	logger.debug('chaincodeVersion  : ' + chaincodeVersion);
 	logger.debug('chaincodeType  : ' + chaincodeType);
-	if (!peers || peers.length == 0) {
-		res.json(getErrorMessage('\'peers\''));
+	
+	if (!peer1) {
+		res.json(getErrorMessage('\'peer1\''));
+		return;
+	}
+	if (!peer2) {
+		res.json(getErrorMessage('\'peer2\''));
 		return;
 	}
 	if (!chaincodeName) {
@@ -213,11 +227,15 @@ app.post('/chaincodes', async function(req, res) {
 		return;
 	}
 	let message = await install.installChaincode(peers, chaincodeName, chaincodePath, chaincodeVersion, chaincodeType, req.username, req.orgname)
-	res.send(message);});
-// Instantiate chaincode on target peers
+	res.send(message);
+});
+
+	// Instantiate chaincode on target peers
 app.post('/channels/:channelName/chaincodes', async function(req, res) {
 	logger.debug('==================== INSTANTIATE CHAINCODE ==================');
-	var peers = req.body.peers;
+	var peer1 = req.body.peer1;
+	var peer2 = req.body.peer2;
+	var peers = [peer1, peer2];
 	var chaincodeName = req.body.chaincodeName;
 	var chaincodeVersion = req.body.chaincodeVersion;
 	var channelName = req.params.channelName;
@@ -255,10 +273,13 @@ app.post('/channels/:channelName/chaincodes', async function(req, res) {
 	let message = await instantiate.instantiateChaincode(peers, channelName, chaincodeName, chaincodeVersion, chaincodeType, fcn, args, req.username, req.orgname);
 	res.send(message);
 });
-// Invoke transaction on chaincode on target peers
+
+// Invoke initLedger transaction on chaincode on target peers
 app.post('/channels/:channelName/chaincodes/:chaincodeName', async function(req, res) {
 	logger.debug('==================== INVOKE ON CHAINCODE ==================');
-	var peers = req.body.peers;
+	var peer1 = req.body.peer1;
+	var peer2 = req.body.peer2;
+	var peers = [peer1, peer2];
 	var chaincodeName = req.params.chaincodeName;
 	var channelName = req.params.channelName;
 	var fcn = req.body.fcn;
@@ -287,6 +308,267 @@ app.post('/channels/:channelName/chaincodes/:chaincodeName', async function(req,
 	let message = await invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname);
 	res.send(message);
 });
+
+// Invoke createHospital transaction on chaincode on target peers
+app.post('/channels/:channelName/chaincodes/:chaincodeName/createhospital', async function(req, res) {
+	logger.debug('==================== INVOKE ON CHAINCODE ==================');
+	var peer1 = req.body.peer1;
+	var peer2 = req.body.peer2;
+	var peers = [peer1, peer2];
+	var chaincodeName = req.params.chaincodeName;
+	var channelName = req.params.channelName;
+	var fcn = req.body.fcn;
+	
+	var hospitalID = req.body.hospitalID;
+	var name = req.body.name;
+	var country = req.body.country;
+	var balance = req.body.balance;
+	var args = [hospitalID, name, country, balance];
+
+	logger.debug('channelName  : ' + channelName);
+	logger.debug('chaincodeName : ' + chaincodeName);
+	logger.debug('fcn  : ' + fcn);
+	logger.debug('args  : ' + args);
+	if (!chaincodeName) {
+		res.json(getErrorMessage('\'chaincodeName\''));
+		return;
+	}
+	if (!channelName) {
+		res.json(getErrorMessage('\'channelName\''));
+		return;
+	}
+	if (!fcn) {
+		res.json(getErrorMessage('\'fcn\''));
+		return;
+	}
+	if (!hospitalID) {
+		res.json(getErrorMessage('\'hospitalID\''));
+		return;
+	}
+	if (!name) {
+		res.json(getErrorMessage('\'name\''));
+		return;
+	}
+	if (!country) {
+		res.json(getErrorMessage('\'country\''));
+		return;
+	}
+	if (!balance) {
+		res.json(getErrorMessage('\'balance\''));
+		return;
+	}
+
+	let message = await invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname);
+	res.send(message);
+});
+
+// Invoke createDoctor transaction on chaincode on target peers
+app.post('/channels/:channelName/chaincodes/:chaincodeName/createdoctor', async function(req, res) {
+	logger.debug('==================== INVOKE ON CHAINCODE ==================');
+	var peer1 = req.body.peer1;
+	var peer2 = req.body.peer2;
+	var peers = [peer1, peer2];
+	var chaincodeName = req.params.chaincodeName;
+	var channelName = req.params.channelName;
+	var fcn = req.body.fcn;
+	
+	var doctorID = req.body.doctorID;
+	var name = req.body.name;
+	var hospitalID = req.body.hospitalID;
+	var balance = req.body.balance;
+	var args = [doctorID, name, hospitalID, balance];
+
+	logger.debug('channelName  : ' + channelName);
+	logger.debug('chaincodeName : ' + chaincodeName);
+	logger.debug('fcn  : ' + fcn);
+	logger.debug('args  : ' + args);
+	if (!chaincodeName) {
+		res.json(getErrorMessage('\'chaincodeName\''));
+		return;
+	}
+	if (!channelName) {
+		res.json(getErrorMessage('\'channelName\''));
+		return;
+	}
+	if (!fcn) {
+		res.json(getErrorMessage('\'fcn\''));
+		return;
+	}
+	if (!hospitalID) {
+		res.json(getErrorMessage('\'hospitalID\''));
+		return;
+	}
+	if (!name) {
+		res.json(getErrorMessage('\'name\''));
+		return;
+	}
+	if (!doctorID) {
+		res.json(getErrorMessage('\'doctorID\''));
+		return;
+	}
+	if (!balance) {
+		res.json(getErrorMessage('\'balance\''));
+		return;
+	}
+
+	let message = await invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname);
+	res.send(message);
+});
+
+// Invoke createPatient transaction on chaincode on target peers
+app.post('/channels/:channelName/chaincodes/:chaincodeName/createpatient', async function(req, res) {
+	logger.debug('==================== INVOKE ON CHAINCODE ==================');
+	var peer1 = req.body.peer1;
+	var peer2 = req.body.peer2;
+	var peers = [peer1, peer2];
+	var chaincodeName = req.params.chaincodeName;
+	var channelName = req.params.channelName;
+	var fcn = req.body.fcn;
+	
+	var patientID = req.body.patientID;
+	var name = req.body.name;
+	var reportID = req.body.reportID
+	var hospitalID = req.body.hospitalID;
+	var balance = req.body.balance;
+	var args = [patientID, name, reportID, hospitalID, balance];
+
+	logger.debug('channelName  : ' + channelName);
+	logger.debug('chaincodeName : ' + chaincodeName);
+	logger.debug('fcn  : ' + fcn);
+	logger.debug('args  : ' + args);
+	if (!chaincodeName) {
+		res.json(getErrorMessage('\'chaincodeName\''));
+		return;
+	}
+	if (!channelName) {
+		res.json(getErrorMessage('\'channelName\''));
+		return;
+	}
+	if (!fcn) {
+		res.json(getErrorMessage('\'fcn\''));
+		return;
+	}
+	if (!hospitalID) {
+		res.json(getErrorMessage('\'hospitalID\''));
+		return;
+	}
+	if (!name) {
+		res.json(getErrorMessage('\'name\''));
+		return;
+	}
+	if (!patientID) {
+		res.json(getErrorMessage('\'patientID\''));
+		return;
+	}
+	if (!reportID) {
+		res.json(getErrorMessage('\'reportID\''));
+		return;
+	}
+	if (!balance) {
+		res.json(getErrorMessage('\'balance\''));
+		return;
+	}
+
+	let message = await invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname);
+	res.send(message);
+});
+
+// Invoke createReport transaction on chaincode on target peers
+app.post('/channels/:channelName/chaincodes/:chaincodeName/createreport', async function(req, res) {
+	logger.debug('==================== INVOKE ON CHAINCODE ==================');
+	var peer1 = req.body.peer1;
+	var peer2 = req.body.peer2;
+	var peers = [peer1, peer2];
+	var chaincodeName = req.params.chaincodeName;
+	var channelName = req.params.channelName;
+	var fcn = req.body.fcn;
+	
+	var reportID = req.body.reportID;
+	var patientID = req.body.patientID;
+	var hospitalID = req.body.hospitalID;
+	var fee = req.body.fee;
+	var args = [reportID, patientID, hospitalID, fee];
+
+	logger.debug('channelName  : ' + channelName);
+	logger.debug('chaincodeName : ' + chaincodeName);
+	logger.debug('fcn  : ' + fcn);
+	logger.debug('args  : ' + args);
+	if (!chaincodeName) {
+		res.json(getErrorMessage('\'chaincodeName\''));
+		return;
+	}
+	if (!channelName) {
+		res.json(getErrorMessage('\'channelName\''));
+		return;
+	}
+	if (!fcn) {
+		res.json(getErrorMessage('\'fcn\''));
+		return;
+	}
+	if (!hospitalID) {
+		res.json(getErrorMessage('\'hospitalID\''));
+		return;
+	}
+	if (!patientID) {
+		res.json(getErrorMessage('\'patientID\''));
+		return;
+	}
+	if (!reportID) {
+		res.json(getErrorMessage('\'reportID\''));
+		return;
+	}
+	if (!fee) {
+		res.json(getErrorMessage('\'fee\''));
+		return;
+	}
+
+	let message = await invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname);
+	res.send(message);
+});
+
+// Invoke transferPatient transaction on chaincode on target peers
+app.post('/channels/:channelName/chaincodes/:chaincodeName/transferpatient', async function(req, res) {
+	logger.debug('==================== INVOKE ON CHAINCODE ==================');
+	var peer1 = req.body.peer1;
+	var peer2 = req.body.peer2;
+	var peers = [peer1, peer2];
+	var chaincodeName = req.params.chaincodeName;
+	var channelName = req.params.channelName;
+	var fcn = req.body.fcn;
+	
+	var patientID = req.body.patientID;
+	var hospitalID = req.body.hospitalID;
+	var args = [patientID, hospitalID];
+
+	logger.debug('channelName  : ' + channelName);
+	logger.debug('chaincodeName : ' + chaincodeName);
+	logger.debug('fcn  : ' + fcn);
+	logger.debug('args  : ' + args);
+	if (!chaincodeName) {
+		res.json(getErrorMessage('\'chaincodeName\''));
+		return;
+	}
+	if (!channelName) {
+		res.json(getErrorMessage('\'channelName\''));
+		return;
+	}
+	if (!fcn) {
+		res.json(getErrorMessage('\'fcn\''));
+		return;
+	}
+	if (!hospitalID) {
+		res.json(getErrorMessage('\'hospitalID\''));
+		return;
+	}
+	if (!patientID) {
+		res.json(getErrorMessage('\'patientID\''));
+		return;
+	}
+
+	let message = await invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname);
+	res.send(message);
+});
+
 // Query on chaincode on target peers
 app.get('/channels/:channelName/chaincodes/:chaincodeName', async function(req, res) {
 	logger.debug('==================== QUERY BY CHAINCODE ==================');
@@ -408,3 +690,4 @@ app.get('/channels', async function(req, res) {
 	let message = await query.getChannels(peer, req.username, req.orgname);
 	res.send(message);
 });
+

@@ -6,7 +6,7 @@ This network is based on 2 Orgs, 4 Peers, single channel and single chaincode.
 
 In the network, there are hospitals, doctors and patients as members and reports as assets.
 
-When a patient creates a report, their balance is reduced by the fee amount mentioned in teh report and the hospital's balance is credited by the similar amount.
+When a patient creates a report, their balance is reduced by the fee amount mentioned in the report and the hospital's balance is credited by the similar amount.
 
 The app allows to create and query every members and assets as well as transfer of patient to another hospital.
 
@@ -50,7 +50,7 @@ cd fabric-samples/healthnet
 * Installs the fabric-client and fabric-ca-client node modules
 * And, starts the node app on PORT 4000
 
-##### Terminal Window 2
+##### Terminal Window 2 for curl or use postman instead
 
 Execute Sample REST APIs Requests
 
@@ -96,7 +96,8 @@ curl -s -X POST \
   -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json" \
   -d '{
-	"peers": ["peer0.org1.example.com","peer1.org1.example.com"]
+	"peer1": "peer0.org1.example.com",
+	"peer2": "peer1.org1.example.com"
 }'
 ```
 ### Install chaincode
@@ -107,7 +108,8 @@ curl -s -X POST \
   -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json" \
   -d '{
-	"peers": ["peer0.org1.example.com","peer1.org1.example.com"],
+	"peer1": "peer0.org1.example.com",
+	"peer2": "peer1.org1.example.com
 	"chaincodeName":"health",
 	"chaincodePath":"github.com/",
 	"chaincodeType": "golang",
@@ -123,7 +125,8 @@ curl -s -X POST \
   -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json" \
   -d '{
-	"peers": ["peer0.org1.example.com","peer1.org1.example.com"],
+	"peer1": "peer0.org1.example.com",
+	"peer2": "peer1.org1.example.com
 	"chaincodeName":"health",
 	"chaincodeVersion":"1.0",
 	"chaincodeType": "golang",
@@ -131,7 +134,7 @@ curl -s -X POST \
 }'
 ```
 
-### Invoke request
+### Invoke request: initLedger
 
 ```
 curl -s -X POST \
@@ -139,23 +142,101 @@ curl -s -X POST \
   -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json" \
   -d '{
-	"peers": ["peer0.org1.example.com","peer1.org1.example.com"],
+	"peer1": "peer0.org1.example.com",
+	"peer2": "peer1.org1.example.com,
 	"fcn":"initLedger",
 	"args":[""]
 }'
 ```
-##### Other invoke functions are:
-* "fcn":"createHospital", "args":["H008","HOSPITAL_8","INDIA","10000000"]
-Function createHospital needs 4 args: HospitalID, Name, Country, Balance
 
-* "fcn":"createDoctor", "args":["D008","DOCTOR_8","H008","100000"]
-Function createDoctor needs 4 args: DoctorID, Name, HospitalID, Balance
+### Invoke request: createHospital
 
-* "fcn":"createPatient", "args":["P008","PATIENT_8","R008","H008","100000"]
-Function createPatient needs 4 args: PatientID, Name, ReportID, HospitalID, Balance
+```
+curl -s -X POST \
+  http://localhost:4000/channels/mychannel/chaincodes/health/createhospital \
+  -H "authorization: Bearer <put JSON Web Token here>" \
+  -H "content-type: application/json" \
+  -d '{
+	"peer1": "peer0.org1.example.com",
+	"peer2": "peer1.org1.example.com,
+	"fcn":"createHospital",
+	"hospitalID":"H004",
+	"name":"HOSPITAL_4",
+	"country":"INDIA",
+	"balance":"10000000"
+}'
+```
 
-* "fcn":"createReport", "args":["R008","P008","H008","1500"]
-Function createReport needs 4 args: ReportID, PatientID, HospitalID, Balance
+### Invoke request: createDoctor
+
+```
+curl -s -X POST \
+  http://localhost:4000/channels/mychannel/chaincodes/health/createdoctor \
+  -H "authorization: Bearer <put JSON Web Token here>" \
+  -H "content-type: application/json" \
+  -d '{
+	"peer1": "peer0.org1.example.com",
+	"peer2": "peer1.org1.example.com,
+	"fcn":"createDoctor",
+	"doctorID":"D007",
+	"name":"Doctor_7",
+	"country":"INDIA",
+	"balance":"100000"
+}'
+```
+
+### Invoke request: createPatient
+
+```
+curl -s -X POST \
+  http://localhost:4000/channels/mychannel/chaincodes/health/createpatient \
+  -H "authorization: Bearer <put JSON Web Token here>" \
+  -H "content-type: application/json" \
+  -d '{
+	"peer1": "peer0.org1.example.com",
+	"peer2": "peer1.org1.example.com,
+	"fcn":"createPatient",
+	"patientID":"P007",
+	"name":"PATIENT_7",
+	"reportID":"R007",
+	"hospitalID":"H004",
+	"balance":"10000"
+}'
+```
+
+### Invoke request: createReport
+
+```
+curl -s -X POST \
+  http://localhost:4000/channels/mychannel/chaincodes/health/createreport \
+  -H "authorization: Bearer <put JSON Web Token here>" \
+  -H "content-type: application/json" \
+  -d '{
+	"peer1": "peer0.org1.example.com",
+	"peer2": "peer1.org1.example.com,
+	"fcn":"createReport",
+	"reportID":"R007",
+	"patientID":"P007",
+	"hospitalID":"H004",
+	"fee":"1000"
+}'
+```
+
+### Invoke request: transferPatient
+
+```
+curl -s -X POST \
+  http://localhost:4000/channels/mychannel/chaincodes/health/transferpatient \
+  -H "authorization: Bearer <put JSON Web Token here>" \
+  -H "content-type: application/json" \
+  -d '{
+	"peer1": "peer0.org1.example.com",
+	"peer2": "peer1.org1.example.com,
+	"fcn":"transferPatient",
+	"patientID":"P007",
+	"hospitalID":"H004"
+}'
+```
 
 **NOTE:** Ensure that you save the Transaction ID from the response in order to pass this string in the subsequent query transactions.
 
